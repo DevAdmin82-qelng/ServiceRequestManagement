@@ -1,5 +1,6 @@
 using SRM.Domain.Common.Models;
 using SRM.Domain.Common.Interfaces;
+using SRM.Domain.Common.Enums;
 using SRM.Domain.UserAggregate.Events;
 using ErrorOr;
 
@@ -10,7 +11,6 @@ public class User : AggregateRoot
     public string FirstName { get; }
     public string LastName { get; }
     public EmailAddress EmailAddress { get; }
-    public Guid DirectManagerId { get; private set; }
     public Guid? AdminId { get; private set; }
     public Guid? SupportId { get; private set; }
     public Guid? EmployeeId { get; private set; }
@@ -40,7 +40,7 @@ public class User : AggregateRoot
         _passwordHash = passwordHash;
     }
 #nullable disable
-        private User() {} // For EF Core mapping.
+    private User() {} // For EF Core mapping.
 
     public static ErrorOr<User> CreateUser(
         string firstName,
@@ -97,7 +97,11 @@ public class User : AggregateRoot
         return SupportId.Value;
     }
 
-    public ErrorOr<Guid> CreateEmployeeProfile()
+    public ErrorOr<Guid> CreateEmployeeProfile(
+            Hierarchy.Role role,
+            Hierarchy.Division? division = null, 
+            Hierarchy.Department? department = null, 
+            Hierarchy.Section? section = null)
     {
         if (EmployeeId is not null)
         {
@@ -108,7 +112,13 @@ public class User : AggregateRoot
 
         EmployeeId = Guid.NewGuid();
 
-        _domainEvents.Add(new EmployeeProfileCreatedEvent(Id, EmployeeId.Value));
+        _domainEvents.Add(new EmployeeProfileCreatedEvent(
+                    Id, 
+                    EmployeeId.Value, 
+                    role, 
+                    division, 
+                    department, 
+                    section));
 
         return EmployeeId.Value;
     }
