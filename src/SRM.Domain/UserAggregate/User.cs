@@ -11,10 +11,8 @@ public class User : AggregateRoot
     public string FirstName { get; }
     public string LastName { get; }
     public EmailAddress EmailAddress { get; }
-    public Guid? AdminId { get; private set; }
-    public Guid? SupportId { get; private set; }
     public Guid? EmployeeId { get; private set; }
-    public Guid? ManagerId { get; private set; } 
+    public Guid? ApproverId { get; private set; }
 
     private readonly string _passwordHash = null!;
     
@@ -23,20 +21,16 @@ public class User : AggregateRoot
         string lastName,
         EmailAddress emailAddress,
         string passwordHash,
-        Guid? adminId = null,
-        Guid? supportId = null,
         Guid? employeeId = null,
-        Guid? managerId = null,
+        Guid? approverId = null,
         Guid? id = null)
             : base(id ?? Guid.NewGuid())
     {
         FirstName = firstName;
         LastName = lastName;
         EmailAddress = emailAddress;
-        AdminId = adminId;
-        SupportId = supportId;
         EmployeeId = employeeId;
-        ManagerId = managerId;
+        ApproverId = approverId;
         _passwordHash = passwordHash;
     }
 #nullable disable
@@ -65,38 +59,6 @@ public class User : AggregateRoot
         return passwordHasher.IsCorrectPassword(password, _passwordHash);
     }
 
-    public ErrorOr<Guid> CreateAdminProfile()
-    {
-        if (AdminId is not null)
-        {
-            return Error.Conflict(
-                    code: "User.Conflict", 
-                    description: "User already has an admin profile");
-        }
-
-        AdminId = Guid.NewGuid();
-
-        _domainEvents.Add(new AdminProfileCreatedEvent(Id, AdminId.Value));
-
-        return AdminId.Value;
-    }
-
-    public ErrorOr<Guid> CreateSupportProfile()
-    {
-        if (SupportId is not null)
-        {
-            return Error.Conflict(
-                    code: "User.Conflict", 
-                    description: "User already has an support profile");
-        }
-
-        SupportId = Guid.NewGuid();
-
-        _domainEvents.Add(new SupportProfileCreatedEvent(Id, SupportId.Value));
-
-        return SupportId.Value;
-    }
-
     public ErrorOr<Guid> CreateEmployeeProfile(
             Hierarchy.Role role,
             Hierarchy.Division? division = null, 
@@ -123,19 +85,19 @@ public class User : AggregateRoot
         return EmployeeId.Value;
     }
 
-    public ErrorOr<Guid> CreateManagerProfile()
+    public ErrorOr<Guid> CreateApproverProfile()
     {
-        if (ManagerId is not null)
+        if (ApproverId is not null)
         {
             return Error.Conflict(
                     code: "User.Conflict", 
-                    description : "User already has an manager profile");
+                    description : "User already has an approver profile profile");
         }
 
-        ManagerId = Guid.NewGuid();
+        ApproverId = Guid.NewGuid();
 
-        _domainEvents.Add(new ManagerProfileCreatedEvent(Id, ManagerId.Value));
+        _domainEvents.Add(new ApproverProfileCreatedEvent(Id, ApproverId.Value));
 
-        return ManagerId.Value;
+        return ApproverId.Value;
     }
 }

@@ -1,5 +1,3 @@
-
-
 using ErrorOr;
 using SRM.Domain.Common.Enums;
 using SRM.Domain.Common.Models;
@@ -54,7 +52,7 @@ public class Employee : AggregateRoot
 			id);
 	}
 
-	public ErrorOr<Guid> CreateRequest(RequestType requestType)
+	public Guid CreateRequest(RequestType requestType)
 	{
 		var requestId = Guid.NewGuid();
 		_requestIds.Add(requestId);
