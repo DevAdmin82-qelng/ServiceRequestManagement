@@ -55,7 +55,7 @@ public class User : AggregateRoot
            return emailResult.Errors;
        }
 
-       return new User(firstName, lastName, emailResult.Value, passwordHash, id: id);
+       return new User(firstName, lastName, emailResult.Value, passwordHash, id);
     }
     
     public bool IsCorrectPasswordHash(
